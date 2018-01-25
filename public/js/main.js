@@ -158,9 +158,30 @@
         
     })
     
+    function create_card(data){
+         console.log(data);
+    }
+    
+    function get_features_rel(button){
+        var id={id:button.value};
+       $.ajax({
+            type: "POST",
+            url: '/features_rel',
+            dataType: 'json',
+            data: id,            
+            success: function( data ) {
+               create_card(data);
+            }
+        })        
+    }
        
     
-    $('.navigation').on("click",'.nav_button',function(){      
+    $('.canvas').on("click",'.nav_button',function(){ 
+      //  console.log($(this).parent().attr('class'));
+        if($(this).parent().attr('class')=='features'){
+            get_features_rel(this);
+        }
+        
        var hidden_id=$('<input id="hidden_data" name="parent_id" type="hidden" value="'+this.value+'">');
       $("#hidden_data").remove();
         $(hidden_id).insertBefore('#add_feature');
@@ -170,30 +191,31 @@
        var data={};
     //   data['type']=$(this).parent().attr('id');
    //    data['table']=this.name;
+       
        data['id']=this.value;
-      data['name']=this.innerText;       
+       data['name']=this.innerText;       
        ajax_add_data(data);
 
 
     })   
         $('.main_container').on('click','.close_button',function(){
-        console.log(this.id);
+    //    console.log(this.id);
         $('#'+this.id).parent().parent().remove();
     }) 
             $('.main_container').on('click','.close_sub',function(){
-        console.log(this.id);
+    //    console.log(this.id);
         $('#'+this.id).parent().remove();
     }) 
 
     function ajax_add_data(data_type){ 
-        console.log(data_type);
+    //    console.log(data_type);
           $.ajax({
             type: "POST",
             url: '/ajax',
             dataType: 'json',
             data: data_type,            
             success: function( data ) {
-                console.log(data);
+             //   console.log(data);
                 var child_div= $('<div></div>').attr('class', 'child_elem').attr('id','child_'+data_type['id']);
                 var close_button=$("<button></button>").attr('id','close_button_'+data_type['id']).attr('class', 'close_sub').text('x');                 
                 $(child_div).append(close_button);                                
@@ -225,25 +247,33 @@
                             $(data_div).append(header_div);
                             var groups={};
                             $.each(value,function(feature_key, feature_val){
+                                var id=feature_val['feature_id'];
+                                if(id==undefined){
+                                    id=feature_val['id'];
+                                }
+                                var data=feature_val['data'];
                                 if(groups[feature_val['name']]=== undefined){
                                     groups[feature_val['name']]=[];
-                                     groups[feature_val['name']].push(feature_val['data']);                                    
+                                     groups[feature_val['name']].push({id:id,name:data});                                    
                                     
                                 }
                                 else{
 
-                                  groups[feature_val['name']].push(feature_val['data']);
+                                  groups[feature_val['name']].push({id:id,name:data});
                                   }
 
                             })                                                    
                             $.each(groups, function(group_key, group_val){
+                        //        console.log(group_val);
                                    var subtopic=$('<b></b>').text(group_key);
-                                   var sub_div=$('<div></div>').attr('class',group_key);
+                                   var sub_div=$('<div></div>').attr('class',key);
                                    $(sub_div).append(subtopic);
-                                   $.each(group_val,function(k, v){                                        
-                                        $(sub_div).append('<p>'+v+'</p>');
+                                   $.each(group_val,function(k, v){
+                         //           console.log(v);
+                                   var button=$('<button></button').attr('value',v.id).attr('class','nav_button').attr('type','button').text(v.name);
+                                   $(sub_div).append(button);
                                 
-                                   })
+                             })
                                    $(content_data_div).append(sub_div);         
                                 
                                 $(data_div).append(content_data_div); 
