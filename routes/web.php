@@ -27,5 +27,5 @@ Route::post('/get_clasters', 'Controller@get_clasters' );
 
 //Route::get('/debug');
 Route::post('/get_areas','Controller@get_areas');
-
+Route::post('/features_rel', 'Controller@features_rel');
 Route::post('/get_groups', 'Controller@get_groups');

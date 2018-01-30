@@ -57,24 +57,27 @@
          <div class="showup">
              <div class="intro"></div>
                 {{ Form::open(['files' => true, 'id'=>'add_attr']) }}
-                {{csrf_field()}}            
+                {{csrf_field()}} 
+                <div class="form_div">          
                 {{Form::button( 'Feature', array('class' => 'btn', 'id'=>'add_feature'))}}            
                 {{ Form::button( 'Media', array('class' => 'btn','id'=>'add_media')) }}
                 {{ Form::button('Description', array('class' => 'btn', 'id'=>'add_description')) }} 
-                {{ Form::button('Link', array('class' => 'btn', 'id'=>'add_link')) }}   
-                <div  class="showup form-group col-md-2 div_link"> 
+                {{ Form::button('Link', array('class' => 'btn', 'id'=>'add_link')) }} 
+                </div> 
+                 <div class="form_div">   
+                <div  class="showup form-group col-md-3 div_link"> 
                 {{Form::select ('links',[],'0',['class' => 'form-control', 'id'=>'links'])}}
                 </div>               
-                <div  class="showup form-group col-md-2 div_feature"> 
+                <div  class="showup form-group col-md-3 div_feature"> 
                 {{Form::select ('feature_groups',[],'0',['class' => 'form-control', 'id'=>'feature_groups'])}}
                 </div>                
-                <div  class="showup form-group col-md-2 div_feature_group">
+                <div  class="showup form-group col-md-3 div_feature_group">
                 {{ Form::text('new_feature_group','', array( 'class'=>'form-control','placeholder' =>'add new feature group' ))}}
                 </div>
-                <div  class="showup form-group col-md-2 div_media"> 
+                <div  class="showup form-group col-md-3 div_media"> 
                 {{ Form::file('media', ['class' => 'form-control'])}}
                 </div>
-                <div  class="showup form-group col-md-2 div_feature">                 
+                <div  class="showup form-group col-md-3 div_feature">                 
                 {{ Form::text('feature','', array( 'class'=>'form-control'))}}                                
                 </div>
               <!--   <div class="form-group">
@@ -82,6 +85,7 @@
  {{Form::textarea('body',null,array('class' => 'form-control', 'placeholder'=>'Content', 'id' => 'technig'))}}
  </div>-->
                  {{ Form::submit('Add Data', array('id'=>'data_submit','class'=>'btn custom_button'))}} 
+                 </div>
                 {{ Form::close() }}
              </div>  
          </div>

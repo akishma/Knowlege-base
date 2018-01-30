@@ -14,8 +14,8 @@
 .nav_button{
     width:80%;
     margin: 0 20px 5px 20px;
-    float:left;
-        font-weight: 700;
+    /* float:left; */
+    font-weight: 700;
 }
 .shortcut{
     /* display: inline; */
@@ -49,9 +49,9 @@
 .showup{display: none;     margin: 0 20px;}
 .child_elem{
     
-margin-left: 20px;
+margin-left: 30px;
     
-margin-top: 10px;
+/* margin-top: 10px; */
     
 /* margin: 10px 20px; */
     
@@ -97,8 +97,6 @@ margin: 0px 25px 5px 10px;
 }
 .close_button{float: right;margin-top: 3px;}
 .content{
-    width: auto;
-    max-width: 500px;
     float:left;
     padding: 0px 0px;
         margin: 0 0 0 12px;
@@ -117,7 +115,7 @@ margin: 0px 25px 5px 10px;
    border-bottom: 1px #ad7016 solid;
    /* border-radius: 5px; */
 }
-.topic h5{
+.content h5{
     font-size: 12pt;
     font-weight: 700;
 }
@@ -169,8 +167,16 @@ label, input {
 .desc_div{
     display:none
 }
+.form_div{
+    
+}
+.description{
+    padding: 20px;
+}
 
-
+.links{
+    max-width: 250px;
+}
 
 
 
