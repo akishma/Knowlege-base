@@ -162,7 +162,7 @@
                                 $(data_div).addClass('col-md-3 content clasters');
                             }
                             else{
-                                $(data_div).addClass('col-md-auto content clasters');
+                                $(data_div).addClass('col-md-2 content clasters');
                             }
                           //  $(data_div  ).attr('id',data_type['type']+'_'+data_type['id']+'_'+key);                     
                             var close_button=$("<button></button>").attr('id', 'close_'+key).attr('class', 'close_button').text('x');

@@ -13,9 +13,8 @@
 }
 .nav_button{
     width:80%;
-    margin: 0 20px 5px 20px;
-    /* float:left; */
-    font-weight: 700;
+    margin: 0 10px 5px 10px;
+
 }
 .shortcut{
     /* display: inline; */
@@ -46,7 +45,7 @@
      vertical-align: baseline;
      border-radius: 0.25em;
 }   
-.showup{display: none;     margin: 0 20px;}
+.showup{display: none;  }
 .child_elem{
     
 margin-left: 30px;
@@ -126,7 +125,7 @@ margin: 0px 25px 5px 10px;
     border-right: 1px grey dotted;
 }
 form{
-      display: flex; /* 2. display flex to the rescue */
+    /*  display: flex;  2. display flex to the rescue */
   flex-direction: row;
 }
 label, input {
@@ -152,8 +151,9 @@ label, input {
 .adding_attr  button{
     border: 1px #6f4924 solid;
     color: #3c763d;
-    margin-right: 15px;
-    min-width: 85px;
+    margin-right: 10px;
+    margin-top: 5px;
+    min-width: 96px;
     height: 35px;
 }  
 #data_submit{
