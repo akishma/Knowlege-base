@@ -13,11 +13,11 @@
 		</title>
 	</head>
 	<body>
-    <div class="main">
+    <div class="header col-md-12">
 		<h1>
 			Welcome to Knowlege Base
 		</h1>
-        </div>
+     </div>
         <div class="main_container col-md-12">
         <div class="nav">
         @foreach ($main_claster as $tab)
@@ -49,11 +49,14 @@
                 {{ Form::label('name', 'Enter name', ['class' => 'awesome'])}}
                 {{ Form::text('name','', array('required' => 'required', 'class'=>'form-control'))}}
              </div>
-                
-                {{ Form::submit('Add Data', array('id'=>'submit','class'=>'btn custom_button'))}}   		
+             <div  class=" form-group col-md-2">    
+                {{ Form::label('    ', '', ['class' => 'awesome'])}}
+                {{ Form::submit('Add Data', array('id'=>'submit','class'=>'btn custom_button'))}}  
+              </div> 		
                 {{ Form::close() }}
+                <button id="data_sinc" class="btn action_btn custom_button">Sinc data</button>
          </div>
-         <div class="adding_attr row ">
+         <div class="adding_attr form-row col-xs-12">
          <div class="showup">
              <div class="intro col-lg-2 col-md-2"></div>
                 {{ Form::open(['files' => true, 'id'=>'add_attr']) }}
@@ -91,8 +94,14 @@
                 {{ Form::close() }}
              </div>  
          </div>
-         <div class="row">
-            <div class="canvas col-md-12">
+         <div class="row col-md-12 canvas-holder">
+           
+                <div class="canvas col-md-10">
+                                    <div class="content clasters desc_div">
+                    <textarea class="form-control" placeholder="Content" id="description" ></textarea>
+                    <button class="btn custom_button desc_save">Save</button>
+                </div>
+                </div>
                 <div id="main_menu" class="clasters col-md-2">            
                     <h5>Categories</h5>                              
                     <div class="navigation" id="claster">
@@ -103,10 +112,23 @@
                         @endif
                     </div>
                 </div>
-                <div class="content clasters desc_div">
-                    <textarea class="form-control" placeholder="Content" id="description" ></textarea>
-                    <button class="btn custom_button desc_save">Save</button>
-                </div>
+                <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width: fit-content" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Image preview</h4>
+      </div>
+      <div class="modal-body">
+        <img src="" id="imagepreview" >
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  
+</div>
+
             </div>
         </div> 
 </div>

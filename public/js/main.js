@@ -2,7 +2,7 @@
         $('#description').summernote({
             //  height:100,
           
-              minHeight: 100,             // set minimum height of editor
+              minHeight: 300,             // set minimum height of editor
               maxHeight: null,             // set maximum height of editor
               focus: true ,
                 toolbar: [    
@@ -19,6 +19,11 @@
                  'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
               }
         });
+           $(".canvas").on("click",'img', function() {
+//    console.log($(this));
+    $('#imagepreview').attr('src', $(this).attr('src')); // here asign the image to the modal when the user click the enlarge link
+    $('#imagemodal').modal('show'); // imagemodal is the id attribute assigned to the bootstrap modal, then i use the show function
+}); 
         function get_clasters(id, type_for_adding){
             if(type_for_adding){
             var data={};
@@ -47,6 +52,7 @@
     }  
 
     $('#type').change(function() {
+        $('.showup').css('display','none')
         var type_for_adding=$('#type').val();
     //    console.log( JSON.stringify(type_for_adding) );
         if(type_for_adding=='Main_claster'){            
@@ -154,18 +160,31 @@
         
     })
     
-    function create_topic(data_type, key){
-       console.log(data_type);
-                                     var topic=$('<h5></h5>').text(data_type['name']+' '+key);    
-                            var data_div= $('<div></div>').attr('id',data_type['type']+'_'+data_type['id']+'_'+key);
-                            if(key=='media' || key=='description'){
-                                $(data_div).addClass('col-md-3 content clasters');
+    
+    function create_topic(data_type, key, name){
+     //  console.log(data_type);
+                            var topic=$('<h5></h5>').text(name+' '+key);
+                            var data_div= $('<div></div>').attr('id',data_type['parent']+'_'+data_type['id']+'_'+key);  
+                            var close_button=$("<button></button>").attr('id', 'close_'+data_type['parent']+'_'+data_type['id']+'_'+key).attr('class', 'close_button').text('x'); 
+                            if('0' in data_type){
+                                
+                                data_div= $('<div></div>').attr('id',data_type[0]['parent']+'_'+data_type[0]['id']+'_'+key); 
+                                close_button=$("<button></button>").attr('id', 'close_'+data_type[0]['parent']+'_'+data_type[0]['id']+'_'+key).attr('class', 'close_button').text('x');   
+                            } 
+                            if(key!==''){
+                                if(key=='media' || key=='description' || key=='' ){
+                                    $(data_div).addClass('col-md-3 content clasters');
+                                }
+                                else{
+                                    $(data_div).addClass('col-md-2 content clasters');
+                                }  
                             }
                             else{
-                                $(data_div).addClass('col-md-2 content clasters');
+                                $(data_div).addClass('col-md-5 content clasters');
                             }
+
                           //  $(data_div  ).attr('id',data_type['type']+'_'+data_type['id']+'_'+key);                     
-                            var close_button=$("<button></button>").attr('id', 'close_'+key).attr('class', 'close_button').text('x');
+                            
                             
                             var header_div=$('<div></div>').attr('class', 'topic');                            
                             $(header_div).append(close_button);
@@ -213,6 +232,49 @@
   })
    return (content_data_div);
     }
+    $('#data_sinc').click(function(){
+        $.ajax({
+            type:"POST",
+            url:'/sinc_data',
+            success:function(data){
+                link_creator(data);
+            //    console.log(data);
+            }
+        })
+    })
+    
+    function create_pos_card(data){
+         var content_data_div=$('<div></div>',{"class": 'pos' });
+         $.each(data, function(key, val){
+             var subtopic=$('<h5></h5>').text(val['name']);
+             var description=$('<div></div>',{"class": 'content' }).append(val['data']);
+             var create_link=$('<button></button>').attr('class','custom_button').attr('type','button').text('Create link')
+             $(content_data_div).append(subtopic);
+             $(content_data_div).append(description);
+             $(content_data_div).append(create_link);
+         })
+
+         return content_data_div;
+    }
+    function getFirstKey(value){
+        var keys=[];
+        $.each(value, function(k,v){
+           keys[0]=k; 
+        })
+        return(keys[0]);
+    }
+    function link_creator(data){
+      console.log(data);
+        $.each(data['links'], function (key, value){  
+            var first=getFirstKey(value);
+            var data_div=create_topic(value, '', 'Found link matches '+ value[first]['area']);
+            var content_data_div=create_pos_card ( value);
+                          $(data_div).append(content_data_div);                          
+                          $('.canvas').append(data_div)
+        })
+    }
+    
+    
     function get_features_rel(button){
         var id={id:button.value};
        $.ajax({
@@ -232,22 +294,22 @@
     }
        
     
-    $('.canvas').on("click",'.nav_button',function(){ 
+    $('.main_container').on("click",'.nav_button',function(){ 
       //  console.log($(this).parent().attr('class'));
         if($(this).parent().attr('class')=='features'){
             get_features_rel(this);     
         }
         else{
-                var hidden_id=$('<input id="hidden_data" name="parent_id" type="hidden" value="'+this.value+'">');
-      $("#hidden_data").remove();
-        $(hidden_id).insertBefore('#add_feature');
-       $('.adding_attr .intro').empty();
-       $('.adding_attr  .intro').text('Insert data for '+this.innerText); 
-       $('.adding_attr .showup').first().css('display','block');     
-       var data={};       
-       data['id']=this.value;
-       data['name']=this.innerText;       
-       ajax_add_data(data);   
+            var hidden_id=$('<input id="hidden_data" name="parent" type="hidden" value="'+this.value+'">');
+            $("#hidden_data").remove();
+            $(hidden_id).insertBefore('#add_feature');
+            $('.adding_attr .intro').empty();
+            $('.adding_attr  .intro').text('Insert data for '+this.innerText); 
+            $('.adding_attr .showup').first().css('display','block');     
+            var data={};       
+            data['id']=this.value;
+            data['name']=this.innerText;       
+            ajax_add_data(data);   
         }
         
 
@@ -283,30 +345,28 @@
                         .text(value['name'])                        
                     $(child_div).append(button);  
                  
-                });
-             //   if(data_type['table']){
+                });            
                     $('#child_'+data_type['id']).remove(); 
                     $('#claster_'+data_type['id']).after(child_div);   
-            //    }
-
-                $.each(data['parent'],function(key, value){                  
-                    $("div[id="+data_type['type']+'_'+data_type['id']+'_'+key+"]").remove();
+     
+                
+                $.each(data['parent'],function(key, value){               
                     if(key=="features" || key=="links"){
-                          var data_div=create_topic(data_type, key);
+                        $("div[id="+value[0]['parent']+'_'+value[0]['id']+'_'+key+"]").remove();
+                          var data_div=create_topic(value, key, data['object'][0]['name']);
                           var content_data_div=create_card(key,value);
                           $(data_div).append(content_data_div);                          
-                          $('#main_menu').after(data_div); 
+                          $('.canvas').append(data_div); 
  
                     }
                     else{
-
-                    $.each(value,function(child_key, child_value){
-                                var data_div=create_topic(data_type, key);
-                                var content_data_div=$('<div></div>',{"class": key });
-                            $(content_data_div).append(child_value['data'])                           
-                                          
+                        $.each(value,function(child_key, child_value){
+                           $("div[id="+child_value['parent']+'_'+child_value['id']+'_'+key+"]").remove();
+                            var data_div=create_topic(child_value, key,data['object'][0]['name']);
+                            var content_data_div=$('<div></div>',{"class": key });
+                            $(content_data_div).append(child_value['data']) ;                                         
                             $(data_div).append(content_data_div); 
-                            $('#main_menu').after(data_div);   
+                            $('.canvas').append(data_div);   
                         })
 
                     }    
@@ -320,6 +380,6 @@
     } 
 
     
-    
+
     
  })

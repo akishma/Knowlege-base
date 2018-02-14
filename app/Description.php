@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Laravel\Scout\Searchable;
 class Description extends Model
 {
     /**
@@ -15,4 +15,11 @@ class Description extends Model
      protected $slugFrom = 'article_name';
      protected $table = 'description';
      public $timestamps = false;
+     use Searchable;
+     
+         public function searchableAs()
+    {
+        return 'data';
+    }
+    
 }

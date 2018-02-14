@@ -9,6 +9,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Laravel\Scout\Searchable;
 use \AlexeyMezenin\LaravelRussianSlugs\SlugsTrait;
 use App\Main_claster;
 use App\Claster;
@@ -76,8 +77,8 @@ class Controller extends BaseController
             dd(DB::getQueryLog());
         }
 
-        $features_parents = DB::table('features_parents')->insert(['feature_id' => $id[0], 'parent_id' => $data->get('parent_id')]);
-        $parent_update = \App\Areas::where('id', $data->get('parent_id'))->update(['features' => '1']);
+        $features_parents = DB::table('features_parents')->insert(['feature_id' => $id[0], 'parent' => $data->get('parent')]);
+        $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['features' => '1']);
        
     }
     function get_groups()
@@ -94,9 +95,9 @@ class Controller extends BaseController
     {
         $record = new \App\Description;
         $record->data = $data->get('description');
-        $record->parent = $data->get('parent_id');
+        $record->parent = $data->get('parent');
         $record->save();
-        $parent_update = \App\Areas::where('id', $data->get('parent_id'))->update(['description' =>
+        $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['description' =>
             '1']);
         return redirect('/')->withCookie(cookie('laravel_session', '', -1));
     }
@@ -104,13 +105,13 @@ class Controller extends BaseController
     {
         $record = new \App\Link;
         $record->first_id = $data->get('links');
-        $record->second_id = $data->get('parent_id');
+        $record->second_id = $data->get('parent');
         $record->save();
         $record = new \App\Link;
         $record->second_id = $data->get('links');
-        $record->first_id = $data->get('parent_id');
+        $record->first_id = $data->get('parent');
         $record->save();
-        $parent_update = \App\Areas::where('id', $data->get('parent_id'))->update(['links' =>
+        $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['links' =>
             '1']);
         $parent_update = \App\Areas::where('id', $data->get('links'))->update(['links' =>
             '1']);
@@ -122,15 +123,15 @@ class Controller extends BaseController
         $image = $data->file('media');
         $destinationPath = public_path('/images');
         $name = $image->getClientOriginalName();
-        $res = DB::table('media')->where('data', $name)->where('parent', $data->get('parent_id'))->
+        $res = DB::table('media')->where('data', $name)->where('parent', $data->get('parent'))->
             first();
         if (!$res) {
             $image->move($destinationPath, $name);
             $record = new \App\Media;
             $record->data = '<img src="images/' . $name . '"/>';
-            $record->parent = $data->get('parent_id');
+            $record->parent = $data->get('parent');
             $record->save();
-            $parent_update = \App\Areas::where('id', $data->get('parent_id'))->update(['media' =>
+            $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['media' =>
                 '1']);
         }
         return redirect('/')->withCookie(cookie('laravel_session', '', -1));
@@ -190,12 +191,49 @@ class Controller extends BaseController
         $res = DB::table($data['table'])->where('name', $data['name'])->first();
         return ($res);
     }
+    function sinc_data(){
+        $areas=\App\Areas::all();      
+        $finded=array();        
+        foreach ($areas as $area){            
+          //  $links=\App\Link::where('first_id',$area->id)->get();
+            $query=\App\Description::search($area->name)->get();       
+          //  foreach ($links as $link){
+              //  $query=$query."->where('parent','<>',".$link->second_id.")";
 
+         //   }
+          //  $query=$query->get();
+           $query=\App\Description::search($area->name)->get();
+            if(Count($query)>0){
+                foreach($query as $key=>$q){                    
+                    $link=\App\Link::where('first_id',$area->id)->where('second_id',$q->parent)->get();
+                    if(Count($link)<1){
+                        $name=\App\Areas::where('id',$q->parent)->pluck('name');
+                        $q->name=$name[0];
+                        $q->area=$area->name;                          
+                    }
+                    else{
+                       unset($query[$key]);
+                        
+                    }
+                   
+                }
+                if(Count($query)>0){                    
+                    $finded['links'][$area->id] =$query;  
+                }
+               
+                    
+            }
+            
+            
+        }
+        
+        return ($finded);
+    }
     function features_rel(Request $request)
     {
         $data = DB::table('features_parents')->where('feature_id', $request->get('id'))->
             join('features', 'features_parents.feature_id', '=', 'features.id')->join('areas',
-            'features_parents.parent_id', '=', 'areas.id')->get();
+            'features_parents.parent', '=', 'areas.id')->get();
         foreach ($data as $attr) {
             $attr->data = $attr->name;
             $parent_name = \App\Areas::where('id', $attr->parent)->get();
@@ -210,13 +248,13 @@ class Controller extends BaseController
         $data = array();
         $data['children'] = \App\Areas::where('parent', $request->get('id'))->get();
         $object_data = \App\Areas::where('id', $request->get('id'))->get();
-        $data['test'] = $object_data;
+        $data['object'] = $object_data;
         $additional_data = ['features', 'media', 'description', 'links'];
         foreach ($additional_data as $addon) {
             if ($object_data[0]->$addon) {
                 if ($addon == 'features') {
 
-                    $addon_data = DB::table('features_parents')->where('parent_id', $request->get('id'))->
+                    $addon_data = DB::table('features_parents')->where('parent', $request->get('id'))->
                         join('features', 'features_parents.feature_id', '=', 'features.id')->join('feature_group',
                         'features.feature_group', '=', 'feature_group.id')->get();
 
@@ -232,6 +270,7 @@ class Controller extends BaseController
 
                     } else {
                         $addon_data = DB::table($addon)->where('parent', $request->get('id'))->get();
+                        
                     }
 
                 }
