@@ -69,7 +69,7 @@
                 </div> 
                  <div class="form_div col-md-7 col-lg-7">   
                 <div  class="showup form-group col-md-3 col-sm-6 col-lg-3 div_link"> 
-                {{Form::select ('links',[],'0',['class' => 'form-control', 'id'=>'links'])}}
+                {{Form::select ('link',[],'0',['class' => 'form-control', 'id'=>'link'])}}
                 </div>               
                 <div  class="showup form-group col-md-3 col-sm-6 col-lg-3  div_feature"> 
                 {{Form::select ('feature_groups',[],'0',['class' => 'form-control', 'id'=>'feature_groups'])}}

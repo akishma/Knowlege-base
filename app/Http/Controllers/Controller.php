@@ -72,14 +72,23 @@ class Controller extends BaseController
 
         }
 
-        $id = \App\Features::where('data', $data->get('feature'))->where('feature_group', $group)->pluck('id')->all();
-        if(!$id[0]){
+        $id = \App\Features::where('data', $data->get('feature'))->where('feature_group',
+            $group)->pluck('id')->all();
+        if (!$id[0]) {
             dd(DB::getQueryLog());
         }
 
-        $features_parents = DB::table('features_parents')->insert(['feature_id' => $id[0], 'parent' => $data->get('parent')]);
-        $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['features' => '1']);
-       
+        $features_parents = DB::table('features_parents')->insert(['feature_id' => $data->get('parent'),
+            'parent' => $data->get('parent')]);
+        $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['features' =>
+            '1']);
+
+    }
+    function add_feature_parent($data){
+                $features_parents = DB::table('features_parents')->insert(['feature_id' => $data->get('id'),
+            'parent' => $data->get('parent')]);
+        $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['features' =>
+            '1']);
     }
     function get_groups()
     {
@@ -101,21 +110,34 @@ class Controller extends BaseController
             '1']);
         return redirect('/')->withCookie(cookie('laravel_session', '', -1));
     }
-    function add_link($data)
+    function add_link($name, $data)
     {
-        $record = new \App\Link;
-        $record->first_id = $data->get('links');
+        $object_name = '\App\\' . $name;
+        $record = new $object_name;
+        $record->first_id = $data->get($name);
         $record->second_id = $data->get('parent');
         $record->save();
-        $record = new \App\Link;
-        $record->second_id = $data->get('links');
+        $object_name = '\App\\' . $name;
+        $record = new $object_name;
+        $record->second_id = $data->get($name);
         $record->first_id = $data->get('parent');
         $record->save();
-        $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['links' =>
-            '1']);
-        $parent_update = \App\Areas::where('id', $data->get('links'))->update(['links' =>
-            '1']);
+        if ($name == 'link') {
+            $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['links' =>
+                '1']);
+            $parent_update = \App\Areas::where('id', $data->get('link'))->update(['links' =>
+                '1']);
+        }
+
+
         return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+
+    }
+    function add_feature_ignore($name,$data){
+        $record= new \App\feature_ignore;
+        $record->feature_id=$data->get($name);
+        $record->area_id=$data->get('parent');
+        $record->save();
     }
 
     function add_media($data)
@@ -140,10 +162,12 @@ class Controller extends BaseController
 
     function newdata(Request $request)
     {
+        if ($request->get('feature_parent')) {
+            self::add_feature_parent($request);
+            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
 
+        }
         if ($request->get('feature')) {
-
-
             self::add_feature($request);
             return redirect('/')->withCookie(cookie('laravel_session', '', -1));
 
@@ -160,12 +184,25 @@ class Controller extends BaseController
             return redirect('/')->withCookie(cookie('laravel_session', '', -1));
 
         }
-        if ($request->get('links')) {
+        if ($request->get('link')) {
 
-            self::add_link($request);
+            self::add_link('link', $request);
             return redirect('/')->withCookie(cookie('laravel_session', '', -1));
 
-        } else {
+        }
+        if ($request->get('link_ignore')) {
+
+            self::add_link('link_ignore', $request);
+            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+
+        }
+        if ($request->get('feature_ignore')) {
+
+            self::add_feature_ignore('feature_ignore', $request);
+            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+
+        }
+         else {
             $res = self::verifyExist(['table' => 'areas', 'name' => $request->input('name')]);
 
             if ($res) {
@@ -191,42 +228,70 @@ class Controller extends BaseController
         $res = DB::table($data['table'])->where('name', $data['name'])->first();
         return ($res);
     }
-    function sinc_data(){
-        $areas=\App\Areas::all();      
-        $finded=array();        
-        foreach ($areas as $area){            
-          //  $links=\App\Link::where('first_id',$area->id)->get();
-            $query=\App\Description::search($area->name)->get();       
-          //  foreach ($links as $link){
-              //  $query=$query."->where('parent','<>',".$link->second_id.")";
+    function sinc_data()
+    {
+        $areas = \App\Areas::all();
+        $features = \App\Features::all();
+        $finded = array();
+        foreach ($areas as $area) {
+            $query = \App\Description::search($area->name)->get();
+            if (Count($query) > 0) {
+                foreach ($query as $key => $q) {
+                    if ($area->id == $q->parent) {
+                        unset($query[$key]);
+                    }
+                    $link = \App\Link::where('first_id', $area->id)->where('second_id', $q->parent)->
+                        get();
+                    $ignore = \App\Link_ignore::where('first_id', $area->id)->where('second_id', $q->
+                        parent)->get();
+                    if (Count($link) < 1 and Count($ignore) < 1) {
+                        $name = \App\Areas::where('id', $q->parent)->pluck('name');
+                        $q->name = $name[0];
+                        $q->area = $area->name;
+                        $q->id = $area->id;
+                    } else {
+                        unset($query[$key]);
 
-         //   }
-          //  $query=$query->get();
-           $query=\App\Description::search($area->name)->get();
-            if(Count($query)>0){
-                foreach($query as $key=>$q){                    
-                    $link=\App\Link::where('first_id',$area->id)->where('second_id',$q->parent)->get();
-                    if(Count($link)<1){
-                        $name=\App\Areas::where('id',$q->parent)->pluck('name');
-                        $q->name=$name[0];
-                        $q->area=$area->name;                          
+                    }
+
+                }
+                if (Count($query) > 0) {
+                    $finded['link'][$area->id] = $query;
+                    if (count($finded, COUNT_RECURSIVE) > 6) {
+                        //        return ($finded);
+                    }
+                }
+
+
+            }
+
+
+        }
+        foreach($features as $feature){
+            $query = \App\Description::search($feature->name)->get();
+            if (Count($query) > 0) {
+                foreach ($query as $key=>$q){
+                    $parents=DB::table('features_parents')->where('feature_id',$feature->id)->where('parent',$q->parent)->get();
+                    if(Count($parents)>0){
+                        unset($query[$key]);
                     }
                     else{
-                       unset($query[$key]);
-                        
+                        $group=DB::table('feature_group')->where('id',$feature->feature_group)->pluck('name');
+                        $name = \App\Areas::where('id', $q->parent)->pluck('name');
+                        $q->name = $name[0];
+                        $q->area = $feature->data;
+                        $q->id = $feature->id;
+                        $q->group=$group[0];
                     }
-                   
+                    if (Count($query) > 0) {
+                        $finded['features'][$feature->id] = $query;
+
                 }
-                if(Count($query)>0){                    
-                    $finded['links'][$area->id] =$query;  
                 }
-               
-                    
+
+
             }
-            
-            
         }
-        
         return ($finded);
     }
     function features_rel(Request $request)
@@ -270,7 +335,7 @@ class Controller extends BaseController
 
                     } else {
                         $addon_data = DB::table($addon)->where('parent', $request->get('id'))->get();
-                        
+
                     }
 
                 }

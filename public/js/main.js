@@ -113,7 +113,7 @@
         $('.div_feature_group').css('display', 'block');
         $('.div_feature').css('display', 'block');
         $('#data_submit').css('display','block');
-        $.ajax({
+      $.ajax({
             type:"POST",
             url:'/get_groups',
             dataType:'json',
@@ -133,7 +133,7 @@
             url:'/get_areas',
             dataType:'json',
             success:function(data){
-                  add_opt(data, '#links');
+                  add_opt(data, '#link');
                   
            
         }
@@ -241,40 +241,82 @@
             //    console.log(data);
             }
         })
+     //   link_creator({link: {25:{3:{id: 25, parent: 94, data: "<p><br></p><p>????? ??????? (????????).</p>", link: null, name: "??????? ??????? ???????? ????????????"}}},
+     //                features: {4:{0:{area:"??????",data:"<p>????? ????????: ",group:"????",id:4,link:null,name:"??????? ??????? ??????? ?????",parent:56}}}});
     })
     
-    function create_pos_card(data){
+    function create_pos_card(type,data){
+       
          var content_data_div=$('<div></div>',{"class": 'pos' });
          $.each(data, function(key, val){
+             var content=$('<div></div>', {"class": "bottom_border"});
              var subtopic=$('<h5></h5>').text(val['name']);
              var description=$('<div></div>',{"class": 'content' }).append(val['data']);
-             var create_link=$('<button></button>').attr('class','custom_button').attr('type','button').text('Create link')
-             $(content_data_div).append(subtopic);
-             $(content_data_div).append(description);
-             $(content_data_div).append(create_link);
+             var create_link=$('<button></button>').attr('type','button').attr('class','add_btn').attr('value',type).text('Create '+type).attr('data-first',val['parent']).attr('data-second',val['id']);
+             var ignore=$('<button></button>').attr('class','add_btn').attr('value',type+'_ignore').attr('type','button').text('Ignore').attr('data-first',val['parent']).attr('data-second',val['id']);
+             $(content).append(subtopic);
+             $(content).append(description);
+             $(content).append(create_link);
+             $(content).append(ignore);
+             $(content_data_div).append(content);
          })
 
          return content_data_div;
     }
     function getFirstKey(value){
-        var keys=[];
-        $.each(value, function(k,v){
-           keys[0]=k; 
-        })
-        return(keys[0]);
+        
+        for (i = 0; i < 100; i++) {            
+            if(i in value){
+                return(i);                
+            }
+
+        }
     }
     function link_creator(data){
-      console.log(data);
-        $.each(data['links'], function (key, value){  
-            var first=getFirstKey(value);
+     console.log(data);
+        $.each(data['link'], function (key,value){             
+            var first=getFirstKey(value);           
             var data_div=create_topic(value, '', 'Found link matches '+ value[first]['area']);
-            var content_data_div=create_pos_card ( value);
+            var content_data_div=create_pos_card ('link', value);
+                          $(data_div).append(content_data_div);                          
+                          $('.canvas').append(data_div)
+                         
+        })
+        $.each(data['features'],function(key,value){
+            var first=getFirstKey(value);           
+            var data_div=create_topic(value, '', 'Found feachers matches '+ value[first]['group']+': '+ value[first]['area']);
+            var content_data_div=create_pos_card ('feature parent', value);
                           $(data_div).append(content_data_div);                          
                           $('.canvas').append(data_div)
         })
     }
     
     
+    $('.canvas').on('click','.add_btn',function(){ 
+        var button=this;
+          var name=this.value;
+          var data={ "_token": "3MH3ZTh9BzYikB1pHtNBQvOtjAZIPXQvJ5v5iSQM"};
+            data[name]=this.dataset.first;
+            data['parent']=this.dataset.second;             
+            console.log(data);
+            $.ajax({
+                type: "POST",
+                url: '/',
+                dataType: 'json',
+                data: data,            
+                success: function( data ) {
+                    console.log('yes');
+                    console.log(data);
+                },
+                 error: function(data, textStatus, errorThrown){
+                     console.log(errorThrown);
+                     console.log(textStatus);             
+                                         
+                     $(button).parent().css( "display", "none" );
+                 }
+                
+                })
+    })
     function get_features_rel(button){
         var id={id:button.value};
        $.ajax({
