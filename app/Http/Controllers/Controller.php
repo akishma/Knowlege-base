@@ -23,7 +23,7 @@ use App\test;
 class Controller extends BaseController
 {
     //  use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-    function index()
+    function index(Request $request)
     {
 
         //  $main_claster=DB::table('Main_claster')->where('id', 1)->first();
@@ -78,14 +78,15 @@ class Controller extends BaseController
             dd(DB::getQueryLog());
         }
 
-        $features_parents = DB::table('features_parents')->insert(['feature_id' => $data->get('parent'),
+        $features_parents = DB::table('features_parents')->insert(['feature_id' => $id[0],
             'parent' => $data->get('parent')]);
         $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['features' =>
             '1']);
+            return redirect('/');
 
     }
     function add_feature_parent($data){
-                $features_parents = DB::table('features_parents')->insert(['feature_id' => $data->get('id'),
+                $features_parents = DB::table('features_parents')->insert(['feature_id' => $data->get('feature_parent'),
             'parent' => $data->get('parent')]);
         $parent_update = \App\Areas::where('id', $data->get('parent'))->update(['features' =>
             '1']);
@@ -134,7 +135,7 @@ class Controller extends BaseController
 
     }
     function add_feature_ignore($name,$data){
-        $record= new \App\feature_ignore;
+        $record= new \App\Feature_ignore;
         $record->feature_id=$data->get($name);
         $record->area_id=$data->get('parent');
         $record->save();
@@ -164,62 +165,58 @@ class Controller extends BaseController
     {
         if ($request->get('feature_parent')) {
             self::add_feature_parent($request);
-            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            return ($request->get('parent'));
 
         }
         if ($request->get('feature')) {
             self::add_feature($request);
-            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            return ($request->get('parent'));
 
         }
         if ($request->file('media')) {
 
             self::add_media($request);
-            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            return ($request->get('parent'));
 
         }
         if ($request->get('description')) {
 
             self::add_description($request);
-            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            return ($request->get('parent'));
 
         }
         if ($request->get('link')) {
 
             self::add_link('link', $request);
-            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            return ($request->get('parent'));
 
         }
         if ($request->get('link_ignore')) {
 
             self::add_link('link_ignore', $request);
-            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            return ($request->get('parent'));
 
         }
-        if ($request->get('feature_ignore')) {
+        if ($request->get('feature_parent_ignore')) {
 
-            self::add_feature_ignore('feature_ignore', $request);
-            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            self::add_feature_ignore('feature_parent_ignore', $request);
+            return ($request->get('parent'));
 
         }
-         else {
+         if ($request->get('name')) {
             $res = self::verifyExist(['table' => 'areas', 'name' => $request->input('name')]);
 
-            if ($res) {
-                return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            if ($res) {               
+               return($request->get('parent'));
             }
 
-
-            $table = 'areas';
-            $data = $request->input('name');
-            $object_name = 'App\\' . $table;
-            $record = new $object_name;
-            $record->name = $data;
+            $record = new \App\Areas;
+            $record->name = $request->get('name');
             if ($request->get('parent')) {
                 $record->parent = $request->get('parent');
             }
             $record->save();
-            return redirect('/')->withCookie(cookie('laravel_session', '', -1));
+            return ($request->get('parent'));
 
         }
     }
@@ -257,9 +254,9 @@ class Controller extends BaseController
                 }
                 if (Count($query) > 0) {
                     $finded['link'][$area->id] = $query;
-                    if (count($finded, COUNT_RECURSIVE) > 6) {
+                  //  if (count($finded, COUNT_RECURSIVE) > 6) {
                         //        return ($finded);
-                    }
+                  //  }
                 }
 
 
@@ -268,7 +265,7 @@ class Controller extends BaseController
 
         }
         foreach($features as $feature){
-            $query = \App\Description::search($feature->name)->get();
+            $query = \App\Description::search($feature->data)->get();
             if (Count($query) > 0) {
                 foreach ($query as $key=>$q){
                     $parents=DB::table('features_parents')->where('feature_id',$feature->id)->where('parent',$q->parent)->get();
@@ -292,6 +289,8 @@ class Controller extends BaseController
 
             }
         }
+        
+
         return ($finded);
     }
     function features_rel(Request $request)

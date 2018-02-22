@@ -13,6 +13,6 @@ class Feature_ignore extends Model
      * 
      */
      protected $slugFrom = 'article_name';
-     protected $table = 'links';
+     protected $table = 'feature_ignor';
      public $timestamps = false;
 }

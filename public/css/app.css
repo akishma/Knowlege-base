@@ -121,7 +121,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f4d9bf', end
         margin: 0 0 0 12px;
         background-color: #fdfdfd;
 }
-#data_sinc{float:right}
+#data_sinc{float:right;margin-top: 24px;}
 .custom_button{
  display: inline-block;
  border:1px solid #DDDDDD;
@@ -186,9 +186,7 @@ label, input {
     font-weight: 700;
     color: #38798a;}
 .adding_attr{
-       /* border-left: 1px grey dotted; */
-       /* border: 1px grey dotted; */
-       /* height: 75px; */
+
        padding: 38px;
 }
 .intro{
@@ -206,13 +204,16 @@ label, input {
     min-width: 96px;
     height: 35px;
 }  
-#data_submit{
+#sub_btn_2{
     display: none;
     height: 35px;
     margin-top: 0;
+    float: left;
 } 
-#submit{
+#sub_btn_1{
     display: none;
+    float: left;
+    margin-top: 24px;
 }
 .desc_div{
     display:none
